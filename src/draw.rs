@@ -109,6 +109,7 @@ pub(crate) fn queue_outline_stencil_mesh(
                 .with_primitive_topology(mesh.primitive_topology)
                 .with_depth_mode(outline.depth_mode)
                 .with_offset_zero(stencil_uniform.offset == 0.0)
+                .with_hdr_format(view.hdr)
                 .with_morph_targets(mesh.morph_targets.is_some())
                 .with_view_key(build_mesh_pipeline_view_layout_key(*msaa, prepasses));
             let Ok(pipeline) =

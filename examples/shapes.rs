@@ -11,7 +11,10 @@ fn main() {
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins((DefaultPlugins, OutlinePlugin))
         .add_systems(Startup, setup)
-        .add_systems(Update, (close_on_esc, wobble, orbit))
+        .add_systems(
+            Update,
+            (close_on_esc, wobble, orbit, toggle_hdr, toggle_outline),
+        )
         .run();
 }
 
@@ -89,9 +92,41 @@ fn setup(
         ..default()
     });
     commands.spawn(Camera3dBundle {
+        camera: Camera {
+            hdr: true,
+            ..default()
+        },
         transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..default()
     });
+
+    // Light
+    commands.spawn(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            shadows_enabled: true,
+            ..default()
+        },
+        transform: Transform::from_translation(Vec3::new(-1.0, 1.0, 1.0))
+            .looking_at(Vec3::ZERO, Vec3::Y),
+        ..default()
+    });
+}
+
+fn toggle_hdr(keys: ResMut<ButtonInput<KeyCode>>, mut query: Query<&mut Camera>) {
+    if keys.just_pressed(KeyCode::KeyH) {
+        for mut camera in query.iter_mut() {
+            camera.hdr = !camera.hdr;
+            println!("hdr: {}", camera.hdr);
+        }
+    }
+}
+
+fn toggle_outline(keys: ResMut<ButtonInput<KeyCode>>, mut query: Query<&mut OutlineVolume>) {
+    if keys.just_pressed(KeyCode::KeyO) {
+        for mut outline in query.iter_mut() {
+            outline.visible = !outline.visible;
+        }
+    }
 }
 
 fn wobble(mut query: Query<&mut Transform, With<Wobbles>>, timer: Res<Time>, mut t: Local<f32>) {
